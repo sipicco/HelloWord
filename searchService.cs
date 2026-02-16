@@ -1,85 +1,137 @@
 ﻿
+
+
 namespace HelloWord
 {
     internal class searchService
     {
         internal List<string> foundWords = new();
 
-
         string myText = "public static bool RectangleContains(Rectangle rect, Vector2 point) " +
             "{return point.X >= rect.X && point.X <= rect.X + rect.Width && " +
             "point.Y >= rect.Y && point.Y <= rect.Y + rect.Height; }";
 
-        // RC -> RectangleContains method
-        // rc -> rect
+        // How to efficiently parse large text files ???
+        // Multiple files (many) on a folder to search
+        // How large?? -> nvm, just read all of them
+        // How many?? -> nvm, just read all of them
 
+        // Filter only files that actually contains code (.cs)
+        // Filter by extension of the filename
 
-        internal List<string> FindWord(string text, string searchWord)
+        // 3 best matches -> scoring system?
+        // search "RC"
+
+        // -- Case + order + length -> exact match
+        // RC
+
+        // -- Case + order -> substring
+        // RCSystem
+        // ARC_RAIDERS
+
+        // -- Case + length
+        // CR
+
+        // -- Case only
+        // ReallyCoolStuff
+
+        // -- Partial match
+        // ReallyBadStuff
+
+        internal Dictionary<string, WordScore> FindWord(string text, string searchWord)
         {
-            // is searchWord capital?
-            bool capitalSearch = text.ToCharArray().Any(c => !char.IsUpper(c));
-
-            // capitalSearch -> recognize methods
-
-            var parts = text.Split(" ");
+            Dictionary<string, WordScore> scoreDict = new();
             int i = 0;
+            string currWord = "";
 
-            while (foundWords.Count < 3 && i < parts.Count())
+            while (i < text.Length) //&& scoreDict.Keys.Count < 3
             {
-                var part = parts[i];
+                if (text[i] == ' ')
+                {
+                    var score = ScoreWord(searchWord, currWord);
+                    if (score.TotScore > 0)
+                    {
+                        scoreDict[currWord] = score;
+                    }
+                    i++;
+                    currWord = "";
+                }
+                else
+                {
+                    currWord += text[i];
+                    i++;
+                }
+            }
+            return scoreDict.OrderByDescending(kvp => kvp.Value.TotScore).ToDictionary();
+        }
 
-                if (capitalSearch && !IsMethod(part))
+        private WordScore ScoreWord(string searchWord, string wordToScore)
+        {
+            // wordToScore contains none of the letters from searchWord -> return 0
+            if (!searchWord.ToCharArray().Any(c => wordToScore.Contains(c))) { return new WordScore(0, 0, 0, 0); }
+
+            // length
+            int lengthScore = searchWord.Length == wordToScore.Length
+                ? 3
+                : 0;
+
+            // Case
+            int casingScore = ScoreCasing(searchWord, wordToScore);
+
+            // Order
+            int orderScore = ScoreOrder(searchWord, wordToScore);
+
+            int totScore = lengthScore + casingScore + orderScore;
+
+            return new WordScore(totScore, lengthScore, casingScore, orderScore);
+        }
+
+        private int ScoreOrder(string searchWord, string wordToScore)
+        {
+            int i = 0;
+            int j = 0;
+
+            while (i < searchWord.Length && j < wordToScore.Length)
+            {
+                if (wordToScore[j] == searchWord[i])
                 {
                     i++;
-                    continue;
+                    j++;
                 }
-                if (searchWord.All(c => part.Contains(c)))
+                else
                 {
-                    var fullSignature = part;
-
-                    // expand left
-                    for (int j = 1; j < 20; j++)
-                    {
-                        fullSignature = $"{parts[i - j]} " + fullSignature;
-
-                        var test = parts[i - j];
-
-                        if (IsAccessModifier(parts[i - j]))
-                        {
-                            break;
-                        }
-                    }
-                    // expand right
-                    for (int j = 1; j < 20; j++)
-                    {
-                        fullSignature = fullSignature + $" {parts[i + j]}";
-
-                        var test = parts[i + j];
-
-                        if (parts[i + j].Contains(")"))
-                        {
-                            break;
-                        }
-                    }
-
-
-                    foundWords.Add(fullSignature);
+                    j++;
                 }
-                i++;
             }
-            return foundWords;
+            return i; // 1 point for each letter in correct order
         }
 
-        private bool IsAccessModifier(string s)
+        private int ScoreCasing(string searchWord, string wordToScore)
         {
-            return s == "public" || s == "private" || s == "internal";
+            // ReallyCool ->    4 pts
+            // Reallycool ->    3 pts
+            // ReallyBad ->     2 pts
+            // reallycool ->    2 pts
+            // reallybad ->     1 pt
+
+            int caseScore = 0;
+            foreach (char c in searchWord)
+            {
+                if (!wordToScore.Contains(c, StringComparison.OrdinalIgnoreCase)) { continue; }
+
+                if (wordToScore.Contains(c, StringComparison.Ordinal))
+                {
+                    caseScore += 2;
+                }
+                else
+                {
+                    // char is there, but with different case
+                    caseScore += 1;
+                }
+            }
+            return caseScore;
         }
 
-        private bool IsMethod(string text)
-        {
-            bool startsCapital = char.IsUpper(text[0]);
-            bool hasParenthesis = text.Contains("(");
-            return startsCapital && hasParenthesis;
-        }
+
     }
 }

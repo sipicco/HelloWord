@@ -13,13 +13,22 @@ internal class Program
             "{return point.X >= rect.X && point.X <= rect.X + rect.Width && " +
             "point.Y >= rect.Y && point.Y <= rect.Y + rect.Height; }";
 
+        string sampleText = "RC Rc rc RCSystem ARC_RAIDERS CR ReallyCoolStuff really_cool_stuff ReallyBadStuff really_bad_stuff";
+
         var service = new searchService();
 
-        var result = service.FindWord(text, searchWord);
+        var wordScoreDict = service.FindWord(sampleText, searchWord);
+
         Console.WriteLine("Found this:");
-        foreach (var word in result)
+        foreach (var (word, score) in wordScoreDict)
         {
-            Console.WriteLine($"{word}");
+            Console.WriteLine($"""
+        '{word}' with Total score: {score.TotScore}
+        --- Length score: {score.LengthScore}
+        --- Casing score: {score.CasingScore}
+        --- Order score: {score.OrderScore}
+        
+        """);
         }
 
 
