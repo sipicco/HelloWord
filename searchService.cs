@@ -1,16 +1,7 @@
-﻿
-
-
-namespace HelloWord
+﻿namespace HelloWord
 {
     internal class searchService
     {
-        internal List<string> foundWords = new();
-
-        string myText = "public static bool RectangleContains(Rectangle rect, Vector2 point) " +
-            "{return point.X >= rect.X && point.X <= rect.X + rect.Width && " +
-            "point.Y >= rect.Y && point.Y <= rect.Y + rect.Height; }";
-
         // How to efficiently parse large text files ???
         // Multiple files (many) on a folder to search
         // How large?? -> nvm, just read all of them
@@ -38,31 +29,82 @@ namespace HelloWord
         // -- Partial match
         // ReallyBadStuff
 
-        internal Dictionary<string, WordScore> FindWord(string text, string searchWord)
-        {
-            Dictionary<string, WordScore> scoreDict = new();
-            int i = 0;
-            string currWord = "";
+        private static string _sampleText = "RC Rc rc RCSystem ARC_RAIDERS CR ReallyCoolStuff really_cool_stuff ReallyBadStuff really_bad_stuff";
+        private static string _sampleTextFilename = "SampleTextFile";
 
-            while (i < text.Length) //&& scoreDict.Keys.Count < 3
+
+        internal Dictionary<string, WordScore> FindWord(string directoryPath, string searchWord, int resultsAmount)
+        {
+
+            var filesDict = new Dictionary<string, string>(); // <fileName, fileContentString>
+            Dictionary<string, WordScore> scoreDict = new(); // <foundWord, score>
+
+            PopulateFilesDict(directoryPath, filesDict);
+            ProcessFilesDict(searchWord, filesDict, scoreDict);
+
+            return scoreDict
+                .OrderByDescending(kvp => kvp.Value.TotScore)
+                .Take(resultsAmount)
+                .ToDictionary();
+        }
+
+        private static void PopulateFilesDict(string directoryPath, Dictionary<string, string> fileDict)
+        {
+            if (directoryPath == "sample")
             {
-                if (!char.IsLetterOrDigit(text[i]))
+                Console.WriteLine($"Using sample text: {_sampleText}");
+                fileDict[_sampleTextFilename] = _sampleText;
+            }
+            else
+            {
+                foreach (string filePath in Directory.GetFiles(directoryPath))
                 {
-                    var score = ScoreWord(searchWord, currWord);
-                    if (score.TotScore > 0)
+                    try
                     {
-                        scoreDict[currWord] = score;
+                        string fileName = Path.GetFileName(filePath);
+                        string content = File.ReadAllText(filePath);
+
+                        fileDict[fileName] = content;
+                        Console.WriteLine($"Loaded: {fileName}");
                     }
-                    i++;
-                    currWord = "";
-                }
-                else
-                {
-                    currWord += text[i];
-                    i++;
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error reading {Path.GetFileName(filePath)}: {ex.Message}");
+                    }
                 }
             }
-            return scoreDict.OrderByDescending(kvp => kvp.Value.TotScore).ToDictionary();
+
+            Console.WriteLine();
+        }
+
+        private void ProcessFilesDict(string searchWord, Dictionary<string, string> filesDict, Dictionary<string, WordScore> scoreDict)
+        {
+            foreach ((string fileName, string fileText) in filesDict)
+            {
+                if (!fileName.EndsWith(".cs") && fileName != _sampleTextFilename) { continue; } // only look at code files
+
+                int i = 0;
+                string currWord = "";
+
+                while (i < fileText.Length)
+                {
+                    if (!char.IsLetterOrDigit(fileText[i]))
+                    {
+                        var score = ScoreWord(searchWord, currWord);
+                        if (score.TotScore > 0)
+                        {
+                            scoreDict[currWord] = score;
+                        }
+                        i++;
+                        currWord = "";
+                    }
+                    else
+                    {
+                        currWord += fileText[i];
+                        i++;
+                    }
+                }
+            }
         }
 
         private WordScore ScoreWord(string searchWord, string wordToScore)
@@ -88,6 +130,10 @@ namespace HelloWord
 
         private int ScoreOrder(string searchWord, string wordToScore)
         {
+            // sq
+            // '
+            // using
+            //  '
             int i = 0;
             int j = 0;
 
@@ -103,7 +149,9 @@ namespace HelloWord
                     j++;
                 }
             }
-            return i; // 1 point for each letter in correct order
+            return i == searchWord.Length
+                ? i // 1 point for each letter in correct order
+                : 0;
         }
 
         private int ScoreCasing(string searchWord, string wordToScore)

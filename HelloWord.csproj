@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+    <ItemGroup>
+        <Compile Remove="SampleTextFiles\**" />
+
+        <None Include="SampleTextFiles\**" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>
