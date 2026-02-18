@@ -46,7 +46,7 @@ namespace HelloWord
 
             while (i < text.Length) //&& scoreDict.Keys.Count < 3
             {
-                if (text[i] == ' ')
+                if (!char.IsLetterOrDigit(text[i]))
                 {
                     var score = ScoreWord(searchWord, currWord);
                     if (score.TotScore > 0)
@@ -68,7 +68,7 @@ namespace HelloWord
         private WordScore ScoreWord(string searchWord, string wordToScore)
         {
             // wordToScore contains none of the letters from searchWord -> return 0
-            if (!searchWord.ToCharArray().Any(c => wordToScore.Contains(c))) { return new WordScore(0, 0, 0, 0); }
+            if (!searchWord.ToCharArray().Any(c => wordToScore.Contains(c, StringComparison.OrdinalIgnoreCase))) { return new WordScore(0, 0, 0, 0); }
 
             // length
             int lengthScore = searchWord.Length == wordToScore.Length

@@ -17,7 +17,7 @@ internal class Program
 
         var service = new searchService();
 
-        var wordScoreDict = service.FindWord(sampleText, searchWord);
+        var wordScoreDict = service.FindWord(text, searchWord);
 
         Console.WriteLine("Found this:");
         foreach (var (word, score) in wordScoreDict)
