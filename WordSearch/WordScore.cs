@@ -1,4 +1,4 @@
-﻿namespace HelloWord
+﻿namespace HelloWord.WordSearch
 {
     internal class WordScore
     {
