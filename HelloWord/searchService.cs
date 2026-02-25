@@ -1,4 +1,4 @@
-﻿namespace HelloWord.WordSearch
+﻿namespace HelloWord
 {
     internal class searchService
     {
