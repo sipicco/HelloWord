@@ -1,8 +1,10 @@
-﻿namespace TreeStudy
+﻿
+
+namespace TreeStudy
 {
     public class MyNode
     {
-        public int Data;
+        public int _data;
 
         public MyNode _rightNode;
 
@@ -10,15 +12,14 @@
 
         public MyNode(int nodeValue)
         {
-            Data = nodeValue;
+            _data = nodeValue;
         }
-
 
         internal void InsertByNode(int value)
         {
             // if new value is >= current node value
             // -> insert it to the right of current node
-            if (value >= Data)
+            if (value >= _data)
             {
                 // Current node already has right child?
                 if (_rightNode is null) // No -> create it and assign value
@@ -43,6 +44,36 @@
                 {
                     _leftNode.InsertByNode(value);
                 }
+            }
+        }
+
+        internal void InOrderTraversalByNode()
+        {
+            if (_leftNode != null)
+            {
+                _leftNode.InOrderTraversalByNode();
+            }
+
+            Console.Write(_data + ", ");
+
+            if (_rightNode != null)
+            {
+                _rightNode.InOrderTraversalByNode();
+            }
+        }
+
+        internal void PreOrderTraversal()
+        {
+            if (_rightNode != null)
+            {
+                _rightNode.PreOrderTraversal();
+            }
+
+            Console.Write(_data + ", ");
+
+            if (_leftNode != null)
+            {
+                _leftNode.PreOrderTraversal();
             }
         }
     }
