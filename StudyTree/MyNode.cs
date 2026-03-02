@@ -1,6 +1,4 @@
-﻿
-
-namespace TreeStudy
+﻿namespace TreeStudy
 {
     public class MyNode
     {
@@ -47,33 +45,129 @@ namespace TreeStudy
             }
         }
 
-        internal void InOrderTraversalByNode()
+        internal void InOrderTraversal()
         {
             if (_leftNode != null)
             {
-                _leftNode.InOrderTraversalByNode();
+                _leftNode.InOrderTraversal();
             }
 
             Console.Write(_data + ", ");
 
             if (_rightNode != null)
             {
-                _rightNode.InOrderTraversalByNode();
+                _rightNode.InOrderTraversal();
+            }
+        }
+
+        internal void ReverseOrderTraversal()
+        {
+            if (_rightNode != null)
+            {
+                _rightNode.ReverseOrderTraversal();
+            }
+
+            Console.Write(_data + ", ");
+
+            if (_leftNode != null)
+            {
+                _leftNode.ReverseOrderTraversal();
             }
         }
 
         internal void PreOrderTraversal()
         {
-            if (_rightNode != null)
-            {
-                _rightNode.PreOrderTraversal();
-            }
-
             Console.Write(_data + ", ");
 
             if (_leftNode != null)
             {
                 _leftNode.PreOrderTraversal();
+            }
+
+            if (_rightNode != null)
+            {
+                _rightNode.PreOrderTraversal();
+            }
+        }
+
+        internal void PostOrderTraversal()
+        {
+            if (_leftNode != null)
+            {
+                _leftNode.PostOrderTraversal();
+            }
+
+            if (_rightNode != null)
+            {
+                _rightNode.PostOrderTraversal();
+            }
+
+            Console.Write(_data + ", ");
+        }
+
+        internal MyNode? Find(int target)
+        {
+            MyNode currentNode = this;
+
+            while (currentNode != null)
+            {
+                if (target == currentNode._data)
+                {
+                    Console.WriteLine("Found: " + currentNode._data);
+                    return currentNode;
+                }
+                else if (target < currentNode._data)
+                {
+                    currentNode = currentNode._leftNode;
+                }
+                else
+                {
+                    currentNode = currentNode._rightNode;
+                }
+            }
+            // target not found
+            Console.WriteLine(target + " not found!");
+            return null;
+        }
+
+        internal void FindRecursive(int target)
+        {
+            if (target == _data)
+            {
+                Console.WriteLine("Found: " + _data);
+                return;
+            }
+            else if (target < _data && _leftNode != null)
+            {
+                _leftNode.FindRecursive(target);
+            }
+            else if (target > _data && _rightNode != null)
+            {
+                _rightNode.FindRecursive(target);
+            }
+            else
+            {
+                Console.WriteLine(target + " not found!");
+                return;
+            }
+        }
+
+        internal void PrintLevelOrder()
+        {
+            Queue<MyNode> queue = new Queue<MyNode>();
+            queue.Enqueue(this); // root
+
+            while (queue.Count > 0)
+            {
+                int levelSize = queue.Count();
+                MyNode current = queue.Dequeue();
+                Console.Write(current._data + ", ");
+
+                if (current._leftNode != null)
+                    queue.Enqueue(current._leftNode);
+
+                if (current._rightNode != null)
+                    queue.Enqueue(current._rightNode);
             }
         }
     }
