@@ -1,4 +1,5 @@
-﻿namespace TreeStudy
+﻿
+namespace TreeStudy
 {
     // Nice YT tutorial: https://www.youtube.com/watch?v=pN1RWeX47tg
 
@@ -136,46 +137,99 @@
                     }
                 }
             }
-            else // --- DELETE NON-LEAF NODE -> found node has ONE CHILD
+            // --- DELETE NON-LEAF NODE -> Connect parent of found node to child of found node 
+            //--- FOUND NODE ONLY HAS RIGHT CHILD
+            else if (current._leftNode == null)
             {
-                // Connect parent of found node to child of found node             
-                if (current._leftNode != null) // Found node has the left child
+                // found node is root && only has right child -> right child is new root
+                if (current == _root)
                 {
-                    // found node is root && only has left child
-                    // -> left child is new root
-                    if (current == _root)
-                    {
-                        _root = current._leftNode;
-                    }
-
-                    if (isLeftChild)
-                    {
-                        parent._leftNode = current._leftNode;
-                    }
-                    else
-                    {
-                        parent._rightNode = current._leftNode;
-                    }
+                    _root = current._rightNode;
                 }
-                else // Found node has the right child
+                if (isLeftChild)
                 {
-                    // found node is root && only has right child
-                    // -> left child is new root
-                    if (current == _root)
-                    {
-                        _root = current._rightNode;
-                    }
-
-                    if (isLeftChild)
-                    {
-                        parent._leftNode = current._rightNode!;
-                    }
-                    else
-                    {
-                        parent._rightNode = current._rightNode!;
-                    }
+                    parent._leftNode = current._rightNode;
+                }
+                else
+                {
+                    parent._rightNode = current._rightNode;
                 }
             }
+            // --- FOUND NODE ONLY HAS LEFT CHILD
+            else if (current._rightNode == null) // Found node has no right child
+            {
+                // found node is root && only has left child -> left child is new root
+                if (current == _root)
+                {
+                    _root = current._leftNode;
+                }
+
+                if (isLeftChild)
+                {
+                    parent._leftNode = current._leftNode!;
+                }
+                else
+                {
+                    parent._rightNode = current._leftNode!;
+                }
+            }
+            // --- FOUND NODE HAS BOTH CHILDREN
+            else
+            {
+                // 1. go to right node
+                // 2. go to left leaf node -> LEAST GREATER NODE aka SUCCESSOR NODE
+                //    (the least number that is greater than the found node)
+                // 3. Successor node might have a right child.
+                //    In this case this right child is the real successor node
+
+                // --- FIND SUCCESSOR aka last least greater node
+                MyNode successor = GetSuccessor(current);
+
+                // if deleting root node -> successor is the new root
+                if (current == _root)
+                {
+                    _root = successor;
+                }
+                // if deleting non-root node -> set parent's left/right child to successor
+                else if (isLeftChild)
+                {
+                    parent._leftNode = successor;
+                }
+                else
+                {
+                    parent._rightNode = successor;
+                }
+            }
+
+
+
+        }
+
+        private MyNode GetSuccessor(MyNode node)
+        {
+            // Method start -> node = what we want to remove from the tree
+
+            MyNode parentOfSuccessor = node;
+            MyNode successor = node;
+            MyNode current = node._rightNode; //current -> right child of node to remove from tree
+
+            // move down to the bottom left child
+            while (current != null)
+            {
+                parentOfSuccessor = successor;
+                successor = current;
+                current = current._leftNode;
+            }
+            if (successor != node._rightNode)
+            {
+                // set the parentOfSuccessor's right child to the successor's right child
+                parentOfSuccessor._leftNode = successor._rightNode;
+                // successor takes nodeToDelete's right child
+                successor._rightNode = node._rightNode;
+            }
+            // successor takes nodeToDelete's left child
+            successor._leftNode = node._leftNode;
+            return successor;
         }
 
         internal void PrintLevelOrder()
