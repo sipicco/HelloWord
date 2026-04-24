@@ -11,7 +11,7 @@ internal class Program
             Console.WriteLine("What to search?");
             string searchWord = Console.ReadLine();
 
-            Console.WriteLine("Where to search? 'sample' to use sample text instead.");
+            Console.WriteLine("Where to search? Specify path or enter 'sample' to use sample text instead.");
             string directoryPath = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(directoryPath) || (!Directory.Exists(directoryPath) && directoryPath != "sample"))
             {
